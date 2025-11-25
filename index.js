@@ -71,6 +71,11 @@ app.get("/debug/patients", async (req, res) => {
   });
 });
 
+app.get("/debug/me", async (req, res) => {
+  const token = req.headers["authorization"];
+  res.json({ token });
+});
+
 // ========================= 🔐 JWT & USUARIOS =========================
 function authenticateToken(req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
