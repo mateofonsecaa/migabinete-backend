@@ -30,17 +30,10 @@ function toLocalDate(dateInput) {
   });
 }
 
-const cors = require("cors");
-
 app.use(cors({
   origin: "https://migabinete-frontend.onrender.com",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
-
-app.use(cors({
-  origin: "*"
 }));
 
 // ⬇️ Aumentamos el límite para base64
