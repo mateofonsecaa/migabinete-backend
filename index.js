@@ -45,6 +45,31 @@ app.get("/", (req, res) => {
   res.send("🌸 BeautyCare API funcionando correctamente 🌸");
 });
 
+// --------------------------
+// DEBUG ENDPOINTS
+// --------------------------
+
+// 1) Render: velocidad pura (sin DB, sin token)
+app.get("/debug/ping", (req, res) => {
+  res.json({ ok: true, serverTime: Date.now() });
+});
+
+// 2) Supabase: velocidad de la base de datos
+app.get("/debug/db", async (req, res) => {
+  const start = Date.now();
+  await prisma.patient.findMany({ take: 1 });
+  res.json({ db_time_ms: Date.now() - start });
+});
+
+// 3) Consulta real: velocidad de tu lógica Prisma
+app.get("/debug/patients", async (req, res) => {
+  const start = Date.now();
+  const patients = await prisma.patient.findMany({ take: 5 });
+  res.json({
+    items: patients.length,
+    total_time_ms: Date.now() - start
+  });
+});
 
 // ========================= 🔐 JWT & USUARIOS =========================
 function authenticateToken(req, res, next) {
