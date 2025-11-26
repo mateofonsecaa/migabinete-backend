@@ -1,7 +1,8 @@
 import { Router } from "express";
 import * as controller from "./auth.controller.js";
 import verifyToken from "./verifyToken.js";
-import upload from "../../config/multer.js"; // si usás multer para fotos de perfil
+import upload from "../../config/multer.js"; 
+import upload from "../../core/middlewares/upload.js";
 
 const router = Router();
 
