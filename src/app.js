@@ -30,7 +30,7 @@ app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 /* --- Archivos estáticos (imagenes perfil) --- */
-app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* --- Ruta base --- */
 app.get("/", (req, res) => {
