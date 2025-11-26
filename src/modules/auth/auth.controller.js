@@ -53,3 +53,25 @@ export const me = async (req, res) => {
         return res.status(500).json({ message: "Error obteniendo usuario actual" });
     }
 };
+
+export const updateProfile = async (req, res, next) => {
+    try {
+        const { firstName, lastName, profession, phone } = req.body;
+
+        const data = {
+        name: `${firstName} ${lastName}`.trim(),
+        profession,
+        phone,
+        };
+
+        if (req.file) {
+        data.profileImage = `/uploads/${req.file.filename}`;
+        }
+
+        const updated = await repo.updateUser(req.user.id, data);
+
+        res.json(updated);
+    } catch (err) {
+        next(err);
+    }
+};

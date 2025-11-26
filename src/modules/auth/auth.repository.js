@@ -38,3 +38,10 @@ export const findUserById = (id) => {
         where: { id },
     });
 };
+
+export const updateUser = (id, data) => {
+  return prisma.user.update({
+    where: { id },
+    data,
+  });
+};
