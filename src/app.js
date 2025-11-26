@@ -13,7 +13,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* --- Seguridad --- */
-app.use(helmet());
+app.use(
+    helmet({
+        crossOriginResourcePolicy: false, // ← NECESARIO PARA CARGAR IMÁGENES DESDE OTRO DOMINIO
+    })
+);
 
 /* --- Logs HTTP --- */
 app.use(morgan("dev"));
