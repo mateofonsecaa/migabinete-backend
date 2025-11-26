@@ -40,4 +40,13 @@ app.get("/", (req, res) => {
 /* --- Rutas del proyecto --- */
 app.use("/api", routes);
 
+// --- Manejador global de errores ---
+app.use((err, req, res, next) => {
+    console.error("🔥 Error en servidor:", err);
+
+    return res.status(400).json({
+        error: err.message || "Error inesperado"
+    });
+});
+
 export default app;
