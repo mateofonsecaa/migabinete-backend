@@ -23,11 +23,13 @@ app.use(
 app.use(morgan("dev"));
 
 /* --- CORS --- */
+/* --- CORS --- */
 app.use(cors({
-    origin: "https://migabinete-frontend.onrender.com",
+    origin: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 
 /* --- Parsers --- */
 app.use(express.json({ limit: "15mb" }));
