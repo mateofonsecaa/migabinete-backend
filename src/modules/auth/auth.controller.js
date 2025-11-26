@@ -27,3 +27,13 @@ export const verifyEmail = async (req, res, next) => {
         next(err);
     }
 };
+
+export const me = async (req, res) => {
+    try {
+        // El middleware verifyToken ya colocó el contenido del token acá:
+        // req.user = { id, email, role, ... }
+        return res.json(req.user);
+    } catch (err) {
+        return res.status(500).json({ message: "Error obteniendo usuario actual" });
+    }
+};
