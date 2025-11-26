@@ -32,3 +32,9 @@ export const deleteVerificationToken = (token) => {
         where: { token },
     });
 };
+
+export const findUserById = (id) => {
+    return prisma.user.findUnique({
+        where: { id },
+    });
+};
