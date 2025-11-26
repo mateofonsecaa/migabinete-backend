@@ -29,17 +29,17 @@ export const verifyEmail = async (req, res, next) => {
     }
 };
 
-// 🔥 NUEVA FUNCIÓN /me CORRECTA
+// ===========================================
+// /me — obtiene el usuario actual
+// ===========================================
 export const me = async (req, res) => {
     try {
-        // req.user viene del verifyToken → { id, email }
         const user = await repo.findUserById(req.user.id);
 
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
-        // Devolvemos SOLO lo que el frontend necesita
         return res.json({
             id: user.id,
             name: user.name,
@@ -54,24 +54,34 @@ export const me = async (req, res) => {
     }
 };
 
-export const updateProfile = async (req, res, next) => {
+// ===========================================
+// Actualizar perfil del usuario
+// ===========================================
+export const updateProfile = async (req, res) => {
     try {
         const { firstName, lastName, profession, phone } = req.body;
 
         const data = {
-        name: `${firstName} ${lastName}`.trim(),
-        profession,
-        phone,
+            name: `${firstName} ${lastName}`.trim(),
+            profession,
+            phone,
         };
 
         if (req.file) {
-        data.profileImage = `/uploads/${req.file.filename}`;
+            data.profileImage = `/uploads/${req.file.filename}`;
         }
 
         const updated = await repo.updateUser(req.user.id, data);
 
-        res.json(updated);
+        return res.json({
+            message: "Perfil actualizado correctamente",
+            user: updated,
+        });
+
     } catch (err) {
-        next(err);
+        return res.status(500).json({
+            message: "No se pudo actualizar el perfil",
+            error: err.message,
+        });
     }
 };

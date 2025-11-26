@@ -16,7 +16,7 @@ router.get("/me", verifyToken, controller.me);
 router.put(
     "/edit-profile",
     verifyToken,
-     upload.single("profileImage"), // IMPORTANTE si enviás foto
+    upload.single("profileImage"),
     controller.updateProfile
 );
 

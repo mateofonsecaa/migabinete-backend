@@ -2,11 +2,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Asegurar carpeta "uploads" si no existe
-const uploadFolder = "uploads";
+// Carpeta absoluta correcta: backend/src/uploads
+const uploadFolder = path.join(process.cwd(), "src/uploads");
 
+// Crear carpeta si no existe
 if (!fs.existsSync(uploadFolder)) {
-    fs.mkdirSync(uploadFolder);
+    fs.mkdirSync(uploadFolder, { recursive: true });
 }
 
 const storage = multer.diskStorage({
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
+        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
         cb(null, uniqueName);
     }
 });
