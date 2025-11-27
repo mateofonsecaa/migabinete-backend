@@ -8,14 +8,20 @@ import { fileURLToPath } from "url";
 
 const app = express();
 
-// Necesario para manejar rutas absolutas
+// __dirname para ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* --- Logs HTTP --- */
-app.use(morgan("dev"));
+/* ============================================================
+   1) PARSERS — DEBEN IR PRIMERO (ANTES DE CORS Y ROUTES)
+   ============================================================ */
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
-/* --- CORS GLOBAL --- */
+/* ============================================================
+   2) CORS — CONFIG PRO Y SIMPLE
+   ============================================================ */
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5500",
@@ -24,54 +30,64 @@ const allowedOrigins = [
   "https://www.migabinete.com.ar"
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("No permitido por CORS"));
+  },
+  credentials: true,
+}));
 
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
+// Preflight global
+app.options("*", cors());
 
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  // ⚠️ CLAVE: aceptar preflight ANTES que cualquier middleware
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204); 
-  }
-
-  next();
-});
-
-/* --- Seguridad --- */
+/* ============================================================
+   3) Seguridad
+   ============================================================ */
 app.use(
-    helmet({
-        crossOriginResourcePolicy: false, // ← NECESARIO PARA CARGAR IMÁGENES DESDE OTRO DOMINIO
-    })
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
 );
 
-/* --- Parsers --- */
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ extended: true, limit: "15mb" }));
+/* ============================================================
+   4) Logs HTTP
+   ============================================================ */
+app.use(morgan("dev"));
 
-/* --- Archivos estáticos (imagenes perfil) --- */
+/* ============================================================
+   5) Archivos estáticos (imagenes)
+   ============================================================ */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/* --- Ruta base --- */
+/* ============================================================
+   6) Ruta base
+   ============================================================ */
 app.get("/", (req, res) => {
-    res.json({ message: "🌸 API funcionando correctamente 🌸" });
+  res.json({ message: "🌸 API funcionando correctamente 🌸" });
 });
 
-/* --- Rutas del proyecto --- */
+/* ============================================================
+   7) Rutas del proyecto
+   ============================================================ */
 app.use("/api", routes);
 
-// --- Manejador global de errores ---
+/* ============================================================
+   8) Error Handler global — CORREGIDO
+   ============================================================ */
 app.use((err, req, res, next) => {
-    console.error("🔥 Error en servidor:", err);
+  console.error("🔥 Error en servidor:", err);
 
-    return res.status(400).json({
-        error: err.message || "Error inesperado"
-    });
+  if (err.message === "No permitido por CORS") {
+    return res.status(403).json({ error: "Origen no permitido" });
+  }
+
+  const status = err.status || 500;
+  res.status(status).json({
+    error: err.message || "Error inesperado",
+  });
 });
 
 export default app;
