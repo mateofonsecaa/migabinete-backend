@@ -4,19 +4,22 @@ import { authenticate } from "../../core/middlewares/authenticate.js";
 
 const router = Router();
 
-// Obtener todos los turnos
+// Paginado liviano
 router.get("/", authenticate, controller.getAll);
 
-// Obtener tratamientos por paciente
+// Por paciente (también paginado)
 router.get("/patient/:id", authenticate, controller.getByPatient);
 
-// Crear turno
+// Solo fotos del tratamiento
+router.get("/:id/photos", authenticate, controller.getPhotos);
+
+// Crear
 router.post("/", authenticate, controller.create);
 
-// Actualizar turno
+// Editar
 router.put("/:id", authenticate, controller.update);
 
-// Eliminar turno
+// Eliminar
 router.delete("/:id", authenticate, controller.remove);
 
 export default router;

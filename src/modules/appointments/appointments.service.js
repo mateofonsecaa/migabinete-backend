@@ -1,31 +1,104 @@
 import prisma from "../../core/prismaClient.js";
 
-// Obtener todos los turnos del usuario
-export const getAll = async (userId) => {
+/* ====================================================
+   🚀 GET ALL (PAGINADO + LIVIANO + MUY RÁPIDO)
+   ==================================================== */
+export const getAll = async (userId, offset = 0, limit = 50) => {
+
+    // Convertir params a número seguro
+    offset = Number(offset) || 0;
+    limit = Number(limit) || 50;
+
     return await prisma.appointment.findMany({
         where: { userId },
-        include: { patient: true },
-        orderBy: { date: "asc" },
+        select: {
+            id: true,
+            date: true,
+            time: true,
+            treatment: true,
+            amount: true,
+            status: true,
+            method: true,
+
+            // Datos livianos del paciente (NO cargar todo)
+            patient: {
+                select: {
+                    id: true,
+                    fullName: true,
+                },
+            },
+        },
+        orderBy: { date: "desc" },
+        skip: offset,
+        take: limit,
     });
 };
 
-// Obtener turnos por ID de paciente
-export const getByPatient = async (userId, patientId) => {
+
+/* ====================================================
+   🚀 GET BY PATIENT (SIN FOTOS)
+   ==================================================== */
+export const getByPatient = async (userId, patientId, offset = 0, limit = 50) => {
+
+    offset = Number(offset) || 0;
+    limit  = Number(limit) || 50;
+
     return await prisma.appointment.findMany({
         where: { userId, patientId },
+        select: {
+            id: true,
+            date: true,
+            time: true,
+            treatment: true,
+            amount: true,
+            status: true,
+            method: true,
+        },
         orderBy: { date: "desc" },
+        skip: offset,
+        take: limit,
     });
 };
 
-// Crear un turno
-export const create = async (userId, data) => {
-    const { patientId, date, time, treatment, amount, notes, status, method, beforePhoto, afterPhoto } = data;
 
-    // Ajuste horario Argentina
+/* ====================================================
+   🚀 GET PHOTOS (Solo fotos, liviano)
+   ==================================================== */
+export const getPhotos = async (id, userId) => {
+    const result = await prisma.appointment.findFirst({
+        where: { id, userId },
+        select: {
+            beforePhoto: true,
+            afterPhoto: true,
+        },
+    });
+
+    return result || { beforePhoto: null, afterPhoto: null };
+};
+
+
+/* ====================================================
+   🚀 CREATE
+   ==================================================== */
+export const create = async (userId, data) => {
+    const {
+        patientId,
+        date,
+        time,
+        treatment,
+        amount,
+        notes,
+        status,
+        method,
+        beforePhoto,
+        afterPhoto
+    } = data;
+
     const treatmentDate = new Date(`${date}T${time}:00-03:00`);
 
     return await prisma.appointment.create({
         data: {
+            userId,
             patientId: Number(patientId),
             date: treatmentDate,
             time,
@@ -36,15 +109,42 @@ export const create = async (userId, data) => {
             method,
             beforePhoto,
             afterPhoto,
-            userId,
         },
-        include: { patient: true },
+        select: {
+            id: true,
+            date: true,
+            time: true,
+            treatment: true,
+            amount: true,
+            notes: true,
+            status: true,
+            method: true,
+            patient: {
+                select: {
+                    id: true,
+                    fullName: true,
+                },
+            },
+        },
     });
 };
 
-// Actualizar turno
+
+/* ====================================================
+   🚀 UPDATE (sin recargar fotos pesadas)
+   ==================================================== */
 export const update = async (id, data) => {
-    const { treatment, date, time, amount, notes, status, method, beforePhoto, afterPhoto } = data;
+    const {
+        treatment,
+        date,
+        time,
+        amount,
+        notes,
+        status,
+        method,
+        beforePhoto,
+        afterPhoto
+    } = data;
 
     const treatmentDate = new Date(`${date}T${time}:00-03:00`);
 
@@ -61,13 +161,31 @@ export const update = async (id, data) => {
             beforePhoto: beforePhoto || null,
             afterPhoto: afterPhoto || null,
         },
-        include: { patient: true },
+        select: {
+            id: true,
+            date: true,
+            time: true,
+            treatment: true,
+            amount: true,
+            notes: true,
+            status: true,
+            method: true,
+            patient: {
+                select: {
+                    id: true,
+                    fullName: true,
+                },
+            },
+        },
     });
 };
 
-// Eliminar turno
+
+/* ====================================================
+    DELETE
+   ==================================================== */
 export const remove = async (userId, id) => {
     return await prisma.appointment.deleteMany({
-        where: { id: Number(id), userId }
+        where: { id: Number(id), userId },
     });
 };
