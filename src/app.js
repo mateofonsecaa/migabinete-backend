@@ -23,12 +23,31 @@ app.use(
 app.use(morgan("dev"));
 
 /* --- CORS --- */
-/* --- CORS --- */
-app.use(cors({
-    origin: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "https://migabinete-frontend.onrender.com",
+    "https://migabinete.com.ar",
+    "https://www.migabinete.com.ar"
+];
+
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (allowedOrigins.includes(origin)) {
+        res.header("Access-Control-Allow-Origin", origin);
+    }
+
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
 
 
 /* --- Parsers --- */
