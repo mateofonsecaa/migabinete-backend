@@ -13,15 +13,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ============================================================
-   1) PARSERS — DEBEN IR PRIMERO (ANTES DE CORS Y ROUTES)
+   1) PARSERS — VAN PRIMERO
    ============================================================ */
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 /* ============================================================
-   2) CORS — CONFIG PRO Y SIMPLE
+   2) CORS PERMITIDO
    ============================================================ */
-
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5500",
@@ -40,17 +39,12 @@ app.use(cors({
   credentials: true,
 }));
 
-// Preflight global
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
-
 /* ============================================================
    3) Seguridad
    ============================================================ */
 app.use(
   helmet({
-    crossOriginResourcePolicy: false,
+    crossOriginResourcePolicy: false, // necesario para /uploads
   })
 );
 
@@ -60,7 +54,7 @@ app.use(
 app.use(morgan("dev"));
 
 /* ============================================================
-   5) Archivos estáticos (imagenes)
+   5) Archivos estáticos (para imágenes)
    ============================================================ */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -72,12 +66,19 @@ app.get("/", (req, res) => {
 });
 
 /* ============================================================
-   7) Rutas del proyecto
+   7) Rutas normales
    ============================================================ */
 app.use("/api", routes);
 
 /* ============================================================
-   8) Error Handler global — CORREGIDO
+   8) 404 — MUY IMPORTANTE: va *después* de las rutas
+   ============================================================ */
+app.use((req, res) => {
+  res.status(404).json({ error: "Ruta no encontrada" });
+});
+
+/* ============================================================
+   9) Error Handler global
    ============================================================ */
 app.use((err, req, res, next) => {
   console.error("🔥 Error en servidor:", err);
@@ -86,8 +87,7 @@ app.use((err, req, res, next) => {
     return res.status(403).json({ error: "Origen no permitido" });
   }
 
-  const status = err.status || 500;
-  res.status(status).json({
+  res.status(err.status || 500).json({
     error: err.message || "Error inesperado",
   });
 });
