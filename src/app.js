@@ -12,43 +12,43 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/* --- Logs HTTP --- */
+app.use(morgan("dev"));
+
+/* --- CORS GLOBAL --- */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:5500",
+  "https://migabinete-frontend.onrender.com",
+  "https://migabinete.com.ar",
+  "https://www.migabinete.com.ar"
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  // ⚠️ CLAVE: aceptar preflight ANTES que cualquier middleware
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); 
+  }
+
+  next();
+});
+
 /* --- Seguridad --- */
 app.use(
     helmet({
         crossOriginResourcePolicy: false, // ← NECESARIO PARA CARGAR IMÁGENES DESDE OTRO DOMINIO
     })
 );
-
-/* --- Logs HTTP --- */
-app.use(morgan("dev"));
-
-/* --- CORS --- */
-const allowedOrigins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:5500",
-    "https://migabinete-frontend.onrender.com",
-    "https://migabinete.com.ar",
-    "https://www.migabinete.com.ar"
-];
-
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-
-    if (allowedOrigins.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
-    }
-
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-    }
-
-    next();
-});
-
 
 /* --- Parsers --- */
 app.use(express.json({ limit: "15mb" }));
