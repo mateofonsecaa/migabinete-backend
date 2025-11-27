@@ -1,16 +1,22 @@
 import prisma from "../../config/prisma.js";
 
-export const getAll = (userId) => {
-    return prisma.patient.findMany({
-        where: { userId },
-        orderBy: { id: "desc" },
-        include: {
-        appointments: {
-            orderBy: { date: "desc" },
-            take: 1
-            }
-        }
-    });
+export const getAll = async (userId) => {
+  const patients = await prisma.patient.findMany({
+    where: { userId },
+    orderBy: { id: "desc" },
+    include: {
+      appointments: {
+        orderBy: { date: "desc" },
+        take: 1
+      }
+    }
+  });
+
+  // ⭐ Transformar appointments en lastTreatment
+  return patients.map(p => ({
+    ...p,
+    lastTreatment: p.appointments[0]?.treatment || null,
+  }));
 };
 
 export const getById = (userId, id) => {
