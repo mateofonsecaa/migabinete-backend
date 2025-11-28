@@ -87,3 +87,15 @@ export const remove = async (req, res, next) => {
         next(err);
     }
 };
+
+export const getCompletedCount = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        const count = await service.getCompletedCount(userId);
+
+        res.json({ count });
+    } catch (err) {
+        next(err);
+    }
+};

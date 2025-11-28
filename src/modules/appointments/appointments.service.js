@@ -97,19 +97,23 @@ export const create = async (userId, data) => {
     const treatmentDate = new Date(`${date}T${time}:00-03:00`);
 
     return await prisma.appointment.create({
-        data: {
-            userId,
-            patientId: Number(patientId),
-            date: treatmentDate,
-            time,
-            treatment,
-            amount: amount ? parseFloat(amount) : null,
-            notes,
-            status,
-            method,
-            beforePhoto,
-            afterPhoto,
-        },
+    data: {
+        userId,
+        patientId: Number(patientId),
+        date: treatmentDate,
+        time,
+        treatment,
+        amount: amount ? parseFloat(amount) : null,
+        notes,
+        status,
+        method,
+        beforePhoto,
+        afterPhoto,
+
+        // 🌸 NUEVO: marcar como completado si está pagado
+        completed: status?.toLowerCase() === "pagado"
+    },
+
         select: {
             id: true,
             date: true,
@@ -151,16 +155,20 @@ export const update = async (id, data) => {
     return await prisma.appointment.update({
         where: { id: Number(id) },
         data: {
-            treatment,
-            date: treatmentDate,
-            time,
-            amount: amount ? parseFloat(amount) : null,
-            notes,
-            status,
-            method,
-            beforePhoto: beforePhoto || null,
-            afterPhoto: afterPhoto || null,
-        },
+        treatment,
+        date: treatmentDate,
+        time,
+        amount: amount ? parseFloat(amount) : null,
+        notes,
+        status,
+        method,
+        beforePhoto: beforePhoto || null,
+        afterPhoto: afterPhoto || null,
+
+        // 🌸 NUEVO: marcar completed si el estado pasa a pagado
+        completed: status?.toLowerCase() === "pagado"
+    },
+
         select: {
             id: true,
             date: true,
@@ -187,5 +195,18 @@ export const update = async (id, data) => {
 export const remove = async (userId, id) => {
     return await prisma.appointment.deleteMany({
         where: { id: Number(id), userId },
+    });
+};
+
+/* ====================================================
+   🚀 COUNT COMPLETED (ultra rápido y optimizado)
+   ==================================================== */
+export const getCompletedCount = async (userId) => {
+    return await prisma.appointment.count({
+        where: {
+            userId,
+            completed: true,
+            status: "pagado"
+        }
     });
 };

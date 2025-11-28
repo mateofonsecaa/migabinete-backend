@@ -22,4 +22,7 @@ router.put("/:id", authenticate, controller.update);
 // Eliminar
 router.delete("/:id", authenticate, controller.remove);
 
+router.get("/completed/count", authenticate, controller.getCompletedCount);
+
+
 export default router;
