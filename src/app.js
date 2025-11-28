@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ============================================================
-   1) 🔥 CORS — DEBE IR PRIMERO SIEMPRE
+   1) CORS COMPLETO — SOPORTA PUT + FORM-DATA
    ============================================================ */
 const allowedOrigins = [
   "http://localhost:3000",
@@ -34,28 +34,23 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Credentials", "true");
 
-  // Respuesta inmediata a preflights
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+  if (req.method === "OPTIONS") return res.sendStatus(200);
 
   next();
 });
 
-
 /* ============================================================
-   2) PARSERS — VAN DESPUÉS DE CORS
+   2) PARSERS — DESPUÉS de CORS
    ============================================================ */
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
-
 
 /* ============================================================
    3) Seguridad
    ============================================================ */
 app.use(
   helmet({
-    crossOriginResourcePolicy: false, // necesario para /uploads
+    crossOriginResourcePolicy: false, // necesario para ver /uploads
   })
 );
 
@@ -65,7 +60,7 @@ app.use(
 app.use(morgan("dev"));
 
 /* ============================================================
-   5) Archivos estáticos
+   5) Archivos estáticos (para imágenes)
    ============================================================ */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -82,14 +77,14 @@ app.get("/", (req, res) => {
 app.use("/api", routes);
 
 /* ============================================================
-   8) 404
+   8) 404 — DESPUÉS de las rutas
    ============================================================ */
 app.use((req, res) => {
   res.status(404).json({ error: "Ruta no encontrada" });
 });
 
 /* ============================================================
-   9) Error handler
+   9) Error Handler global
    ============================================================ */
 app.use((err, req, res, next) => {
   console.error("🔥 Error en servidor:", err);

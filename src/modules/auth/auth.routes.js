@@ -16,7 +16,7 @@ router.get("/me", verifyToken, controller.me);
 router.put(
     "/edit-profile",
     verifyToken,
-    upload.single("profileImage"),
+    upload.single("profileImage"),   // ✔ Multer correctamente ubicado
     controller.updateProfile
 );
 
