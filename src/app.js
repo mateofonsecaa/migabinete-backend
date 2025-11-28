@@ -13,16 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ============================================================
-   1) PARSERS — VAN PRIMERO
-   ============================================================ */
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ extended: true, limit: "15mb" }));
-
-/* ============================================================
-   2) CORS PERMITIDO
-   ============================================================ */
-/* ============================================================
-   2) CORS — VERSIÓN COMPLETA QUE SOPORTA PUT + FORM-DATA
+   1) 🔥 CORS — DEBE IR PRIMERO SIEMPRE
    ============================================================ */
 const allowedOrigins = [
   "http://localhost:3000",
@@ -43,13 +34,20 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Credentials", "true");
 
-  // Preflight CORS
+  // Respuesta inmediata a preflights
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
 
   next();
 });
+
+
+/* ============================================================
+   2) PARSERS — VAN DESPUÉS DE CORS
+   ============================================================ */
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 
 /* ============================================================
@@ -67,7 +65,7 @@ app.use(
 app.use(morgan("dev"));
 
 /* ============================================================
-   5) Archivos estáticos (para imágenes)
+   5) Archivos estáticos
    ============================================================ */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -84,14 +82,14 @@ app.get("/", (req, res) => {
 app.use("/api", routes);
 
 /* ============================================================
-   8) 404 — MUY IMPORTANTE: va *después* de las rutas
+   8) 404
    ============================================================ */
 app.use((req, res) => {
   res.status(404).json({ error: "Ruta no encontrada" });
 });
 
 /* ============================================================
-   9) Error Handler global
+   9) Error handler
    ============================================================ */
 app.use((err, req, res, next) => {
   console.error("🔥 Error en servidor:", err);
