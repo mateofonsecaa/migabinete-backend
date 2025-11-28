@@ -21,6 +21,9 @@ app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 /* ============================================================
    2) CORS PERMITIDO
    ============================================================ */
+/* ============================================================
+   2) CORS — VERSIÓN COMPLETA QUE SOPORTA PUT + FORM-DATA
+   ============================================================ */
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5500",
@@ -29,15 +32,25 @@ const allowedOrigins = [
   "https://www.migabinete.com.ar"
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("No permitido por CORS"));
-  },
-  credentials: true,
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  // Preflight CORS
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 
 /* ============================================================
    3) Seguridad
