@@ -14,10 +14,10 @@ router.get("/me", verifyToken, controller.me);
 
 // Editar perfil (datos + imagen)
 router.put(
-    "/edit-profile",
-    verifyToken,
-    upload.single("profileImage"),   // ✔ Multer correctamente ubicado
-    controller.updateProfile
+  "/edit-profile",
+  verifyToken,
+  upload.single("profileImage"), // Multer en memoria
+  controller.updateProfile
 );
 
 export default router;
