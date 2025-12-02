@@ -1,5 +1,5 @@
 // backend/src/core/utils/upload.js
-import { supabase } from "../supabaseClient.js";   // OJO: debe ser import con {}
+import supabase from "../supabaseClient.js";  // OJO: debe ser import con {}
 import { randomUUID } from "crypto";
 
 // Genera nombre único
