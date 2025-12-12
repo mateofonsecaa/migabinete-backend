@@ -18,8 +18,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5500",
   "https://migabinete-frontend.onrender.com",
-  "https://migabinete.com.ar",
-  "https://www.migabinete.com.ar"
+  "https://tugabinete.com",
+  "https://www.tugabinete.com"
 ];
 
 app.use((req, res, next) => {

@@ -85,3 +85,13 @@ export const remove = async (userId, id) => {
 
   return { message: "Turno eliminado correctamente" };
 };
+
+export const update = (userId, id, data) => {
+  return prisma.simpleAppointment.updateMany({
+    where: { id, userId },
+    data: {
+      time: data.time,
+      date: data.date
+    }
+  });
+};
